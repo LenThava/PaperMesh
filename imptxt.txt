@@ -1,0 +1,1 @@
+https://apidia.net/java/JabRef/5.15/index.html?cls=org.jabref.preferences  this link is for javadoc
