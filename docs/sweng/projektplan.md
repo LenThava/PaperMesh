@@ -8,6 +8,8 @@ Supervisor: Giovanni.
 
 This is a rough, tentative plan. We still need to check the work division and estimates together. The hours below are person-hours, not calendar days. We will help each other where needed.
 
+We will adjust the estimates after trying a small prototype and speaking with Giovanni.
+
 ## Tasks
 
 | Task | Rough effort | Who | Earliest start / depends on |

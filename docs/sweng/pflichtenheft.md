@@ -12,15 +12,23 @@ Supervisor: Giovanni.
 
 ### 1.1 Purpose
 
-This is a first outline of what we want to build.
+This is a first outline of what we want to build, for our team and Giovanni to discuss.
 
 ### 1.2 Scope and goals
 
 We would like to add a graph view to JabRef so users can find related papers and put them into groups. For now, we plan to use titles and keywords from selected entries or a selected group. External APIs and automatic clustering can wait.
 
+The idea is to make an existing library easier to explore, not to find new papers online.
+
 ### 1.3 Definitions
 
-An entry is a paper in JabRef. In the graph, entries are nodes and connections between them are links.
+An entry is a paper in JabRef. In the graph, entries are nodes and connections between them are links. A group is a named collection of entries in JabRef.
+
+### 1.4 Referenced documents
+
+- [Project proposal](https://docs.google.com/document/d/1McPw3q44qVgxCBKDS9bsi2TjOvbiyJpUuNvl4MF80sc/edit)
+- [Course instructions and template](https://patrickschniderunibas.github.io/software-engineering/project/requirements)
+- [Project plan](projektplan.md)
 
 ### 1.5 Overview
 
@@ -40,13 +48,15 @@ Show a graph, pan and zoom, inspect a connection, open an entry, and make a grou
 
 Students and researchers using JabRef are the main users. Our team builds it, Giovanni reviews it, and JabRef maintainers may later review the changes.
 
+Users should only need normal JabRef experience, not programming knowledge.
+
 ### 2.4 Constraints
 
 We plan to use JavaFX and the course JabRef environment. We will start with a selection of papers, not a whole large library.
 
 ### 2.5 Assumptions
 
-A JabRef library is open. Titles and keywords may be missing. We still need to decide how similarity is calculated and how large the graph can be.
+A JabRef library is open. Titles and keywords may be missing. The first version should work without an external API. We still need to decide how similarity is calculated and how large the graph can be.
 
 ## 3. Requirements
 
