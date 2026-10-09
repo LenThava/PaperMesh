@@ -2,7 +2,7 @@
 
 PaperMesh - Literature Similarity Map for JabRef
 
-First draft, 9 October 2026. The scope and plan are tentative. We will revise them after discussing the open questions with Giovanni.
+First draft, 9 October 2026. This is still tentative. We will go through it with the team and Giovanni.
 
 Team: Cian Boeniger, Dehlen Thavarajah, Gian Ledergeber and Hrishi Budema.
 
@@ -12,107 +12,92 @@ Supervisor: Giovanni.
 
 ### 1.1 Purpose
 
-This document describes what we would like to build and gives our team and Giovanni a basis for discussion.
+This is a first outline of what we want to build.
 
 ### 1.2 Scope and goals
 
-PaperMesh will add a graph view to JabRef. Users should be able to explore related papers from their existing library and organise them into groups.
-
-We plan to start with titles and keywords from selected entries or a selected group. External APIs and automatic topic clustering are not part of the first draft.
+We would like to add a graph view to JabRef so users can find related papers and put them into groups. For now, we plan to use titles and keywords from selected entries or a selected group. External APIs and automatic clustering can wait.
 
 ### 1.3 Definitions
 
-- Entry: a paper stored in JabRef.
-- Node: an entry shown in the graph.
-- Link: a connection between related entries.
-- Group: a collection of entries in JabRef.
-
-### 1.4 Referenced documents
-
-- [Project proposal](https://docs.google.com/document/d/1McPw3q44qVgxCBKDS9bsi2TjOvbiyJpUuNvl4MF80sc/edit)
-- [Course instructions and template](https://patrickschniderunibas.github.io/software-engineering/project/requirements)
-- [Project plan](projektplan.md)
+An entry is a paper in JabRef. In the graph, entries are nodes and connections between them are links.
 
 ### 1.5 Overview
 
-Section 2 describes the context, section 3 the requirements, and section 4 the acceptance criteria. The use cases are in Appendix A.
+The draft covers the idea, requirements, acceptance checks and use cases.
 
 ## 2. General description
 
 ### 2.1 Integration
 
-The graph will use JabRef's existing entries and groups. The shared JabRef codebase and the place from which users open PaperMesh are still to be agreed.
+PaperMesh will work with JabRef's entries and groups. We still need to choose the shared JabRef codebase and where to open the graph.
 
 ### 2.2 Main functions
 
-Generate a graph, inspect connections, open an entry in JabRef, and create a group from selected nodes. Users should also be able to pan and zoom.
+Show a graph, pan and zoom, inspect a connection, open an entry, and make a group from selected nodes.
 
-### 2.3 User profiles
+### 2.3 Users
 
-The main users are students and researchers who already use JabRef. They should not need programming knowledge. The team, Giovanni and JabRef maintainers are also affected by the extension.
+Students and researchers using JabRef are the main users. Our team builds it, Giovanni reviews it, and JabRef maintainers may later review the changes.
 
 ### 2.4 Constraints
 
-We will use the course JabRef environment and plan to build the graph interface with JavaFX. We will start with a limited selection of entries rather than the whole library.
+We plan to use JavaFX and the course JabRef environment. We will start with a selection of papers, not a whole large library.
 
-### 2.5 Assumptions and dependencies
+### 2.5 Assumptions
 
-The user has an open JabRef library. Similarity will initially use the available title and keyword data. The calculation and graph limits still need discussion. Missing metadata must not cause a crash.
+A JabRef library is open. Titles and keywords may be missing. We still need to decide how similarity is calculated and how large the graph can be.
 
-## 3. Individual requirements
+## 3. Requirements
 
-- /F10/ The system must generate a graph from selected entries or a selected group, with one node per entry. (UC1)
-- /F20/ The system must support connections based on shared title or keyword terms and show the terms explaining a displayed connection. (UC2)
-- /F30/ The system must let the user pan and zoom the graph. (UC1)
-- /F40/ The system must let the user open or select the corresponding entry in JabRef. (UC3)
-- /F50/ The system must let the user create a JabRef group containing exactly the entries represented by the selected nodes. (UC4)
-- /F60/ Viewing the graph must not change the original bibliographic fields. Entries with neither usable title nor keywords must remain visible without invented connections. (UC1–UC3)
+- /F10/ PaperMesh must show one node per selected entry and allow pan and zoom. A selected group can also be used. (UC1)
+- /F20/ Links must be based on shared title or keyword terms, and show the terms behind the connection. (UC2)
+- /F30/ A node must let the user open or select its entry in JabRef. (UC3)
+- /F40/ Users must be able to create a JabRef group from selected nodes. (UC4)
+- /F50/ Exploring the graph must not change bibliographic fields. Entries with neither usable title nor keywords must stay visible without links. (UC1–UC3)
 
-## 4. Acceptance criteria
+## 4. Acceptance checks
 
-- /A10/ Selecting three entries and generating a graph shows three nodes. The graph can be panned and zoomed. Empty input gives a message. Checks /F10/ and /F30/.
-- /A20/ Two test entries with a shared keyword produce an explainable connection. The explanation shows a term actually present in both entries. Checks /F20/.
-- /A30/ Opening a node selects or opens the correct JabRef entry. Checks /F40/.
-- /A40/ Selecting two nodes and creating a group adds exactly those two entries. Cancelling creates no group. Checks /F50/.
-- /A50/ An entry with no usable title or keywords remains visible and unconnected. Bibliographic fields are unchanged after exploring the graph. Checks /F60/.
+- /A10/ Three selected entries give three nodes; pan and zoom work. Empty input shows a message. (/F10/)
+- /A20/ Two test entries with the same keyword are linked. The explanation shows that keyword. (/F20/)
+- /A30/ Opening a node opens or selects the matching entry, not another one. (/F30/)
+- /A40/ A group made from two selected nodes contains exactly those two entries. Cancelling creates nothing. (/F40/)
+- /A50/ An entry with neither usable title nor keywords stays visible and unconnected. Exploring the graph leaves bibliographic fields unchanged. (/F50/)
 
 ## Appendix A. Use cases
 
-### UC1: Generate a graph
+The actor is a JabRef user with an open library. UC2–UC4 also need an open graph.
 
-- Actor: JabRef user.
-- Preconditions: A library is open.
-- Flow: Select entries or a group, start PaperMesh, then explore the graph with pan and zoom.
-- Success: The selected entries are visible.
-- Exceptions: Empty input gives a message. Entries without usable metadata remain visible and unconnected.
+### UC1: Show the graph
+
+Select entries or a group, open PaperMesh, then pan and zoom.
+
+- Result: The selected entries are shown as nodes.
+- Exceptions: Empty input shows a message. Entries with neither usable title nor keywords are shown without links.
 
 ### UC2: Inspect a connection
 
-- Actor: JabRef user.
-- Preconditions: A graph is open.
-- Flow: Inspect a link and read the shared terms explaining it.
-- Success: The user can see why the papers are connected.
-- Exception: If there are no connections, the graph still shows its nodes.
+Choose a link and read the shared terms.
 
-### UC3: Open an entry
+- Result: The user sees why the papers are connected.
+- Exception: If there are no links, the nodes are still shown.
 
-- Actor: JabRef user.
-- Preconditions: A graph is open.
-- Flow: Choose a node and use its open/select action.
-- Success: The corresponding entry is opened or selected in JabRef.
-- Exception: If the entry no longer exists, show a message and do not open another entry.
+### UC3: Open a paper
 
-### UC4: Create a group
+Choose a node and use the open/select action.
 
-- Actor: JabRef user.
-- Preconditions: A graph is open.
-- Flow: Select nodes, choose group creation and enter a group name.
-- Success: A new group contains exactly the selected entries.
-- Exceptions: No selected nodes or a blank name prompts the user to correct the input. Cancelling creates no group.
+- Result: Its entry is opened or selected in JabRef.
+- Exception: If the entry was removed, show a message instead.
+
+### UC4: Make a group
+
+Select nodes, choose group creation, enter a name and confirm.
+
+- Result: A new group contains exactly those entries.
+- Exceptions: No selection or a blank name needs correcting. Cancelling creates nothing.
 
 ## Open questions
 
-- OPEN QUESTION: Is this initial scope enough, or should graph search be included?
-- OPEN QUESTION: Which similarity calculation should we use?
-- OPEN QUESTION: How many entries and links should we display?
-- OPEN QUESTION: Which JabRef codebase and interface entry point should we use?
+- OPEN QUESTION: Is this scope enough, or do we need search too?
+- OPEN QUESTION: How should we calculate similarity and limit the graph?
+- OPEN QUESTION: Which JabRef codebase and place in the interface should we use?
