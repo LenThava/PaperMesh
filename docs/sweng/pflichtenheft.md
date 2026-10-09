@@ -1,8 +1,10 @@
-# Pflichtenheft — PaperMesh
+# Pflichtenheft
 
-Initial draft, 9 October 2026. We will review the scope and open questions with Giovanni. This is not the final specification.
+PaperMesh - Literature Similarity Map for JabRef
 
-Team: Cian Boeniger, Len Thava, Gian Ledergeber and Hrishi Budema.
+First draft, 9 October 2026. The scope and plan are tentative. We will revise them after discussing the open questions with Giovanni.
+
+Team: Cian Boeniger, Dehlen Thavarajah, Gian Ledergeber and Hrishi Budema.
 
 Supervisor: Giovanni.
 
@@ -10,121 +12,107 @@ Supervisor: Giovanni.
 
 ### 1.1 Purpose
 
-This document describes the first proposed version of PaperMesh. It gives our team and supervisor a shared basis for implementation and acceptance testing.
+This document describes what we would like to build and gives our team and Giovanni a basis for discussion.
 
 ### 1.2 Scope and goals
 
-PaperMesh adds a literature similarity map to JabRef. It should help users see relationships between papers already in their library, inspect these relationships and organise related entries.
+PaperMesh will add a graph view to JabRef. Users should be able to explore related papers from their existing library and organise them into groups.
 
-For the first version, we propose using titles and keywords only. The user starts with selected entries or a selected JabRef group. The map supports pan, zoom, similarity explanations, opening entries and creating a group from selected nodes.
-
-External APIs, full-text analysis, AI-based recommendations, automatic topic clustering and graph search are outside this initial scope. We can discuss these as later additions rather than promise them now.
+We plan to start with titles and keywords from selected entries or a selected group. External APIs and automatic topic clustering are not part of the first draft.
 
 ### 1.3 Definitions
 
-- Entry: one bibliographic record in JabRef.
-- Node: an entry shown in the map.
-- Link: a connection between two entries with shared metadata terms.
-- Similarity score: a value between 0 and 1 describing the overlap of these terms.
-- Group: a JabRef collection of entries.
+- Entry: a paper stored in JabRef.
+- Node: an entry shown in the graph.
+- Link: a connection between related entries.
+- Group: a collection of entries in JabRef.
 
 ### 1.4 Referenced documents
 
 - [Project proposal](https://docs.google.com/document/d/1McPw3q44qVgxCBKDS9bsi2TjOvbiyJpUuNvl4MF80sc/edit)
-- [Course requirements instructions](https://patrickschniderunibas.github.io/software-engineering/project/requirements)
-- [Course Pflichtenheft template](https://raw.githubusercontent.com/PatrickSchniderUnibas/software-engineering/main/docs/project/templates/pflichtenheft-template.md)
+- [Course instructions and template](https://patrickschniderunibas.github.io/software-engineering/project/requirements)
 - [Project plan](projektplan.md)
 
 ### 1.5 Overview
 
-Section 2 describes the context and assumptions. Section 3 lists the proposed requirements, section 4 explains how to check them, and Appendix A describes the user workflows from which they were derived.
+Section 2 describes the context, section 3 the requirements, and section 4 the acceptance criteria. The use cases are in Appendix A.
 
 ## 2. General description
 
 ### 2.1 Integration
 
-PaperMesh will be part of JabRef, using its existing entries, selection, entry editor and groups. The interface will use JavaFX. It will read local metadata; generating or exploring the map must not change that metadata. Creating a group is an explicit user action.
-
-The shared JabRef codebase and exact menu or toolbar entry point are still to be agreed. The current repository contains project documentation, not the JabRef implementation.
+The graph will use JabRef's existing entries and groups. The shared JabRef codebase and the place from which users open PaperMesh are still to be agreed.
 
 ### 2.2 Main functions
 
-Generate a map, inspect a connection, navigate to an entry and create a group from selected nodes. Pan, zoom and a similarity threshold help users explore the map.
+Generate a graph, inspect connections, open an entry in JabRef, and create a group from selected nodes. Users should also be able to pan and zoom.
 
 ### 2.3 User profiles
 
-The main users are students and researchers who already use JabRef. They should not need programming knowledge. Other stakeholders are JabRef users and maintainers, our project team, and Giovanni as supervisor and reviewer.
+The main users are students and researchers who already use JabRef. They should not need programming knowledge. The team, Giovanni and JabRef maintainers are also affected by the extension.
 
 ### 2.4 Constraints
 
-Development will use the course JabRef version, Java 21 and JavaFX. We propose a maximum of 100 entries per map and five links per node to keep the first version manageable. These limits are proposals for the supervisor discussion, not measured performance claims.
+We will use the course JabRef environment and plan to build the graph interface with JavaFX. We will start with a limited selection of entries rather than the whole library.
 
 ### 2.5 Assumptions and dependencies
 
-The user has an open JabRef library. Some entries may have missing metadata. The similarity score measures word overlap, not whether papers really discuss the same topic. No internet connection or external API is required for the proposed core features.
-
-Our initial scoring proposal is simple: use unique lowercase words from title and keywords, with punctuation separating words. The score is the number of shared words divided by the number of words in their combined set. An empty combined set gives a score of 0. The proposed default threshold is 0.2. We will check this approach with Giovanni before finalising it.
+The user has an open JabRef library. Similarity will initially use the available title and keyword data. The calculation and graph limits still need discussion. Missing metadata must not cause a crash.
 
 ## 3. Individual requirements
 
-- /F10/ The system must let the user generate a map from selected entries or one selected group. It must show one node per entry for inputs of 1–100 entries. An empty input or more than 100 entries must produce a clear message without generating a partial map. (UC1)
-- /F11/ The system must keep entries with neither usable title nor keywords visible as unconnected nodes. A missing title must use the citation key as its label, or "Untitled entry" if that is also missing; available keywords can still be used for similarity. (UC1)
-- /F12/ Generating, filtering or exploring a map must leave the original bibliographic metadata unchanged. (UC1–UC3)
-- /F20/ The system must calculate similarity from title and keyword terms using the initial rule in section 2.5, and keep the score and shared terms available for each displayed link. (UC2)
-- /F21/ The system must let the user adjust the threshold between 0 and 1. It must show only links with a positive score at least equal to that threshold, with at most five links per node and higher-scoring connections prioritised. (UC2)
-- /F30/ The system must let the user pan and zoom the map without changing its entries. (UC1)
-- /F31/ The system must let the user inspect a link's score and shared terms, for example through a tooltip or detail panel. If there are no qualifying links, the nodes must still be shown. (UC2)
-- /F40/ The system must let the user open or select the corresponding JabRef entry from a node. If that entry has been removed from the library, it must show a message instead of opening another entry. (UC3)
-- /F50/ The system must let the user create a new JabRef group containing exactly the entries represented by the selected nodes. (UC4)
-- /F51/ Group creation must require at least one selected node and a non-empty, unused group name. Invalid input or cancellation must not create a group or change existing groups. (UC4)
+- /F10/ The system must generate a graph from selected entries or a selected group, with one node per entry. (UC1)
+- /F20/ The system must support connections based on shared title or keyword terms and show the terms explaining a displayed connection. (UC2)
+- /F30/ The system must let the user pan and zoom the graph. (UC1)
+- /F40/ The system must let the user open or select the corresponding entry in JabRef. (UC3)
+- /F50/ The system must let the user create a JabRef group containing exactly the entries represented by the selected nodes. (UC4)
+- /F60/ Viewing the graph must not change the original bibliographic fields. Entries with neither usable title nor keywords must remain visible without invented connections. (UC1–UC3)
 
 ## 4. Acceptance criteria
 
-- /A10/ With a library containing three test entries, generating a map from those entries or their group shows exactly three nodes. One entry shows one node. Zero entries or 101 entries produces a message rather than a partial map. Checks /F10/.
-- /A20/ For term sets {graph, networks, map} and {graph, models, map}, the displayed similarity is 0.5 and the explanation contains "graph" and "map". A threshold of 0.6 hides that link. A third entry with no shared terms has no link to them. Checks /F20/, /F21/ and /F31/.
-- /A21/ A test collection with more than five possible connections per entry never displays more than five links on one node. Pan and zoom work, and a map with no qualifying links still shows its nodes. Checks /F21/, /F30/ and /F31/.
-- /A30/ Opening a node selects or opens the correct entry in JabRef. Removing that entry before opening it produces a clear message. Checks /F40/.
-- /A40/ Selecting three nodes and creating a group with a new name creates a group with exactly those three entries. No selection, an empty or duplicate name, and cancellation leave the groups unchanged. Checks /F50/ and /F51/.
-- /A50/ An entry with neither usable title nor keywords is shown using its citation key or fallback label and remains unconnected. An entry without a title but with keywords can still connect through those keywords. Comparing the library before and after map generation, filtering and navigation confirms that its bibliographic fields have not changed. Checks /F11/ and /F12/.
+- /A10/ Selecting three entries and generating a graph shows three nodes. The graph can be panned and zoomed. Empty input gives a message. Checks /F10/ and /F30/.
+- /A20/ Two test entries with a shared keyword produce an explainable connection. The explanation shows a term actually present in both entries. Checks /F20/.
+- /A30/ Opening a node selects or opens the correct JabRef entry. Checks /F40/.
+- /A40/ Selecting two nodes and creating a group adds exactly those two entries. Cancelling creates no group. Checks /F50/.
+- /A50/ An entry with no usable title or keywords remains visible and unconnected. Bibliographic fields are unchanged after exploring the graph. Checks /F60/.
 
 ## Appendix A. Use cases
 
-### UC1: Generate and explore a map
+### UC1: Generate a graph
 
 - Actor: JabRef user.
-- Preconditions: A library is open and the user has selected entries or a group.
-- Normal flow: 1. The user starts PaperMesh. 2. PaperMesh reads the selection and calculates connections. 3. The map appears. 4. The user pans or zooms it.
-- Successful outcome: The chosen entries are visible without changing their metadata.
-- Exceptions: Empty input or more than 100 entries gives a message and asks the user to choose a valid input. Entries with neither usable title nor keywords remain unconnected; a missing title uses the fallback label. A valid input with no similarities still shows its nodes.
+- Preconditions: A library is open.
+- Flow: Select entries or a group, start PaperMesh, then explore the graph with pan and zoom.
+- Success: The selected entries are visible.
+- Exceptions: Empty input gives a message. Entries without usable metadata remain visible and unconnected.
 
-### UC2: Understand a connection
-
-- Actor: JabRef user.
-- Preconditions: A map is open.
-- Normal flow: 1. The user inspects a link. 2. PaperMesh shows its score and shared terms. 3. The user changes the threshold to show fewer or more connections.
-- Successful outcome: The user can see why a displayed connection exists.
-- Exceptions: If the new threshold leaves no links, the nodes remain visible. A value outside 0–1 is rejected without changing the current threshold.
-
-### UC3: Open a paper in JabRef
+### UC2: Inspect a connection
 
 - Actor: JabRef user.
-- Preconditions: A map containing the paper's node is open.
-- Normal flow: 1. The user chooses the node's open/select action. 2. JabRef selects or opens the corresponding entry.
-- Successful outcome: The user reaches the correct entry without metadata changes.
-- Exception: If the entry no longer exists, PaperMesh shows a message and opens no entry.
+- Preconditions: A graph is open.
+- Flow: Inspect a link and read the shared terms explaining it.
+- Success: The user can see why the papers are connected.
+- Exception: If there are no connections, the graph still shows its nodes.
 
-### UC4: Create a group from the map
+### UC3: Open an entry
 
 - Actor: JabRef user.
-- Preconditions: A map is open and its entries still exist in the active library.
-- Normal flow: 1. The user selects related nodes. 2. The user chooses group creation and enters a name. 3. PaperMesh creates the group with exactly those entries.
-- Successful outcome: The new group is available in JabRef.
-- Exceptions: No selection, a blank name or an existing name prompts the user to correct the input; no group is created. Cancellation leaves all groups unchanged.
+- Preconditions: A graph is open.
+- Flow: Choose a node and use its open/select action.
+- Success: The corresponding entry is opened or selected in JabRef.
+- Exception: If the entry no longer exists, show a message and do not open another entry.
+
+### UC4: Create a group
+
+- Actor: JabRef user.
+- Preconditions: A graph is open.
+- Flow: Select nodes, choose group creation and enter a group name.
+- Success: A new group contains exactly the selected entries.
+- Exceptions: No selected nodes or a blank name prompts the user to correct the input. Cancelling creates no group.
 
 ## Open questions
 
-- OPEN QUESTION: Does this smaller, local-data-only scope meet the project expectations, or should graph search or other proposal features be required?
-- OPEN QUESTION: Is the proposed word-overlap score useful enough? Should we remove common words or handle different languages differently?
-- OPEN QUESTION: Are the proposed 100-entry limit, five-link limit and default threshold suitable?
-- OPEN QUESTION: Which shared JabRef repository and revision should we use, and where should PaperMesh be opened in the interface?
-- OPEN QUESTION: Should the map refresh when the library changes, or should users generate a new map in the first version?
+- OPEN QUESTION: Is this initial scope enough, or should graph search be included?
+- OPEN QUESTION: Which similarity calculation should we use?
+- OPEN QUESTION: How many entries and links should we display?
+- OPEN QUESTION: Which JabRef codebase and interface entry point should we use?

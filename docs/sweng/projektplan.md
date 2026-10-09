@@ -1,61 +1,55 @@
-# PaperMesh project plan
+# Projektplan
 
-Initial draft, 9 October 2026. This is a tentative plan, not a fixed commitment. We will review it together and with Giovanni after the first feedback.
+PaperMesh - first draft, 9 October 2026.
 
-Team: Cian Boeniger, Len Thava, Gian Ledergeber and Hrishi Budema.
+Team: Cian Boeniger, Dehlen Thavarajah, Gian Ledergeber and Hrishi Budema.
 
 Supervisor: Giovanni.
 
+This is a tentative plan. The tasks, estimates and work division may change after our discussion with Giovanni and a closer look at the JabRef code.
+
 ## Tasks
 
-The estimates below are person-hours of effort, not continuous calendar time. Dates are proposed earliest starts and depend on the previous tasks and our availability. The responsible person coordinates the task; we will help each other where needed.
+The estimates are rough person-hours, not calendar days. Start dates are proposed earliest starts; dependencies and our availability may shift them.
 
-| ID | Task | Estimated effort | Responsible person | Earliest start / dependency |
-| --- | --- | --- | --- | --- |
-| T01 | Agree the shared JabRef codebase and complete team access | 4 h | Gian | 12 Oct; team decision and Gian's GitHub username |
-| T02 | Review and update the Pflichtenheft and plan after feedback | 4 h | Len | 13 Oct; supervisor discussion, final version by 27 Oct |
-| T03 | Read selected JabRef entries/groups and identify integration points | 6 h | Gian | 13 Oct; T01 |
-| T04 | Implement metadata normalisation, similarity scoring and unit tests | 12 h | Cian | 20 Oct; T03 and initial scope agreement |
-| T05 | Build a small graph model and JavaFX prototype | 10 h | Len | 20 Oct; T03, agreed input/output model with Cian |
-| T06 | Document the technical design and prototype | 6 h | Hrishi, with team input | 27 Oct; T04/T05 prototype, first version by 30 Oct |
-| T07 | Connect real entries; add pan, zoom and link explanations | 12 h | Len | 3 Nov; T04/T05 |
-| T08 | Add entry navigation, node selection and group creation | 10 h | Gian | 10 Nov; T07 |
-| T09 | Add threshold/link limits and missing-metadata handling | 6 h | Cian, with Len | 10 Nov; T04/T07 |
-| T10 | Write the test plan and add automated checks | 8 h | Hrishi | 10 Nov; T04/T05, first test-plan version by 13 Nov |
-| T11 | Run integration and acceptance tests | 10 h | Hrishi, with team support | 17 Nov; T08/T09/T10 |
-| T12 | Fix issues and improve usability | 6 h | Len, with team support | 24 Nov; T11 |
-| T13 | Finish user documentation, demo data and presentation | 8 h | Hrishi, with all team members | 24 Nov; working core features, presentation by 1 Dec |
-| T14 | Final review and prepare the complete project submission | 4 h | Len, with all team members | 2 Dec; T12/T13, final submission by 15 Dec |
-
-These rough estimates total 106 person-hours across the team. They are a starting point and may change once we understand the JabRef code better. If time is short, we will prioritise the core features and discuss scope changes with Giovanni rather than silently drop requirements.
+| Task | Estimated effort | Responsible person | Earliest start / dependency |
+| --- | --- | --- | --- |
+| Agree the JabRef codebase and try reading selected entries | 6–10 h | Gian | From 12 Oct, after the team chooses a codebase |
+| Revise the Pflichtenheft and plan | 2–4 h | Dehlen | After feedback on 13 Oct |
+| Normalise title/keyword data and build the similarity backend | 8–12 h | Cian | After entry access is working |
+| Build the graph model and JavaFX interface | 12–20 h | Dehlen | After agreeing the data passed to the graph |
+| Add entry navigation and group creation | 8–12 h | Gian | After the graph prototype |
+| Prepare design/prototype documentation | 6–10 h | Hrishi, with the team | Once the first prototype is available |
+| Write the test plan and test the main functions | 8–12 h | Hrishi | Alongside implementation, then after integration |
+| Fix issues and improve usability | 8–12 h | Whole team | After the first integration tests |
+| Prepare user documentation, demo and presentation | 6–10 h | Hrishi, with the team | Once the core functions are working |
+| Final review and complete project submission | 2–4 h | Dehlen, with the team | After testing and documentation |
 
 ## Tentative work division
 
-- Cian: metadata, similarity calculation and related tests.
-- Len: graph interface and coordination of the requirements draft.
-- Gian: integration with JabRef, entry navigation and groups.
-- Hrishi: testing, documentation and demo preparation.
+- Cian: metadata and similarity.
+- Dehlen: graph interface.
+- Gian: JabRef integration and groups.
+- Hrishi: testing and documentation.
 
-Gian is a full team member. His repository access is still pending; this does not change his role in the plan. The team should confirm this division and the effort estimates together.
+We will help each other where needed. This is only a starting point for the team's own planning.
 
 ## Course milestones
 
-- 9 Oct: first Pflichtenheft and project-plan submission.
-- 13 Oct: discussion with Giovanni.
-- 27 Oct: final revised Pflichtenheft and project plan.
-- 30 Oct: first design/prototype submission; discussion on 3 Nov and final version on 10 Nov.
-- 13 Nov: first test-plan submission; discussion on 17 Nov and final version on 24 Nov.
-- 1 Dec: presentation.
-- 15 Dec: complete project submission.
+- Pflichtenheft and plan: first submission 9 Oct, discussion 13 Oct, final version 27 Oct.
+- Design/prototype: first submission 30 Oct, final version 10 Nov.
+- Test plan: first submission 13 Nov, final version 24 Nov.
+- Presentation: 1 Dec.
+- Complete project submission: 15 Dec.
 
 ## Open questions
 
-- OPEN QUESTION: Does the work division fit everyone's availability?
-- OPEN QUESTION: Is the proposed core scope and effort realistic after the first code exploration?
-- OPEN QUESTION: Which JabRef codebase will be shared, and when can Gian receive repository access?
+- OPEN QUESTION: Does this division fit everyone's availability?
+- OPEN QUESTION: Are the effort estimates realistic after looking at the code?
+- OPEN QUESTION: Which shared JabRef codebase will we use?
 
 ## Submission workflow
 
-The [Pflichtenheft](pflichtenheft.md) and this plan belong in `docs/sweng` on `requirements`. The group submits one pull request from `requirements` into `project`, with Giovanni as reviewer. The PR stays open for feedback; this initial draft is not the final version.
+The [Pflichtenheft](pflichtenheft.md) and this plan are submitted together through one group PR from requirements to project, with Giovanni as reviewer.
 
-[Course requirements](https://patrickschniderunibas.github.io/software-engineering/project/requirements) · [Course timetable](https://patrickschniderunibas.github.io/software-engineering/project/project-summary)
+[Course instructions](https://patrickschniderunibas.github.io/software-engineering/project/requirements) · [Course timetable](https://patrickschniderunibas.github.io/software-engineering/project/project-summary)
