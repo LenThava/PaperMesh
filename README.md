@@ -17,11 +17,13 @@ The documentation structure is prepared. The complete development setup still re
 ## Group members
 
 - Cian Boeniger
-- Len Thava
-- Gian Ledergerber
+- Dehlen Thavarajah
+- Gian Ledergeber
 - Hrishi Budema
 
 ## Project description
+
+The description below is the earlier proposal. The smaller current scope and tentative interface are described in the [working Pflichtenheft](https://github.com/LenThava/PaperMesh/blob/requirements/docs/sweng/pflichtenheft.md).
 
 PaperMesh extends JabRef with an interactive, Obsidian-inspired graph view of the managed bibliography. Its goal is to help researchers discover relationships, topic clusters, and potentially overlooked papers within an existing JabRef library.
 
@@ -44,8 +46,8 @@ The main difficulty will be calculating useful similarity scores from incomplete
 This is a tentative division of the work and may change during the project:
 
 - **Cian Boeniger:** metadata processing and similarity calculation.
-- **Len Thava:** the graph interface.
-- **Gian Ledergerber:** integration with JabRef.
+- **Dehlen Thavarajah:** the graph interface.
+- **Gian Ledergeber:** integration with JabRef.
 - **Hrishi Budema:** testing and documentation.
 
 We will help each other where needed.
