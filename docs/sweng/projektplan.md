@@ -8,11 +8,13 @@ Supervisor: Giovanni.
 
 This is a rough plan, updated after the feedback on 13 and 22 October. We still need to agree the work division and check the estimates together. The hours are person-hours, not calendar days. Start dates below are planning assumptions, not evidence that tasks have been completed.
 
+Codebase selected on 26 October: the private [LenThava/jabref_hs26](https://github.com/LenThava/jabref_hs26) course fork, starting from main at `c705647a4e2c37ae9f608cdd959d98c88a0fde44`. This records the repository decision only; access, build and integration checks remain tasks below.
+
 ## Tasks
 
 | Task | Rough effort | Who | Earliest start / depends on |
 | --- | --- | --- | --- |
-| Agree the shared course codebase and try reading entries/groups | 6–10 h | Gian, with the team | From 26 Oct; before integration |
+| Check team access and build the selected course fork; try reading entries/groups | 6–10 h | Gian, with the team | From 26 Oct; before integration |
 | Check the window sketch, comparison rule and graph limit on sample data | 2–4 h | Cian and Dehlen, with the team | From 26 Oct; before finalising requirements |
 | Revise the Pflichtenheft and plan using Giovanni's feedback | 4–6 h | Dehlen, with the team | Current revision 26 Oct; remaining team decisions before 27 Oct |
 | Prepare title/keyword data, similarity and explanations | 8–12 h | Cian | After entry access and the comparison rule are agreed |

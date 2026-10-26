@@ -6,13 +6,13 @@ Software Engineering HS 2026 project proposal.
 
 ## Repository status
 
-This repository currently contains PaperMesh project documentation. The team has not yet selected or added the JabRef source code.
+This public repository contains PaperMesh project documentation. The selected development codebase is the private course fork [LenThava/jabref_hs26](https://github.com/LenThava/jabref_hs26). Its initial revision is recorded in the [working Pflichtenheft](https://github.com/LenThava/PaperMesh/blob/requirements/docs/sweng/pflichtenheft.md); private course source will not be copied here.
 
-- [`project`](https://github.com/LenThava/PaperMesh/tree/project): shared project branch and documentation index.
+- [`project`](https://github.com/LenThava/PaperMesh/tree/project): documentation review branch and index.
 - [`requirements`](https://github.com/LenThava/PaperMesh/tree/requirements/docs/sweng): working branch for the Pflichtenheft and project plan.
 - Project documentation is kept in `docs/sweng`.
 
-The documentation structure is prepared. The complete development setup still requires a shared JabRef codebase and access for every team member.
+The codebase choice is recorded. Team access, a reproducible shared build and implementation-branch setup still need checking; selecting a repository does not mean those tasks are complete.
 
 ## Group members
 
