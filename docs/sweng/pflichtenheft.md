@@ -2,7 +2,7 @@
 
 PaperMesh - Literature Similarity Map for JabRef
 
-Working draft, revised 14 October 2026 after Giovanni's feedback. This is still tentative: the window layout, similarity rule and limits below are proposals for the team to try and agree before the final version on 27 October. They are not implemented features.
+Working draft, revised 26 October 2026 after Giovanni's feedback of 22 October. This document specifies the currently planned behaviour, not implemented or approved features. The team still needs to confirm the interface, similarity calculation, limits and shared codebase before the final version on 27 October.
 
 Team: Cian Boeniger, Dehlen Thavarajah, Gian Ledergeber and Hrishi Budema.
 
@@ -26,6 +26,8 @@ The described version does not require an external API or online account. OpenAl
 | --- | --- |
 | Entry | One bibliographic record in a JabRef library, not necessarily a downloaded paper or PDF. |
 | Selected entries | Rows explicitly highlighted by the user in JabRef's main entry table. |
+| Source library | The JabRef library from which the current graph was generated. It remains the target for navigation and new groups even if another library becomes active. |
+| Test library | A separate library containing the predefined sample entries pmA–pmD below. Each acceptance test uses a fresh copy unless stated otherwise. |
 | JabRef group | A named collection of entries managed in JabRef. Group input means the members of the group selected in JabRef's groups sidebar, not just highlighted table rows. |
 | Node | One entry displayed in the graph, labelled with its citation key and title where available. |
 | Link | A displayed connection between two entries whose similarity meets the chosen rule. |
@@ -39,6 +41,7 @@ The described version does not require an external API or online account. OpenAl
 - [Course JabRef/Java setup](https://patrickschniderunibas.github.io/software-engineering/exercises/jabref-setup)
 - [Project plan](projektplan.md)
 - [Giovanni's feedback, 13 October](https://github.com/LenThava/PaperMesh/pull/1#issuecomment-6146387203)
+- [Giovanni's review, 22 October](https://github.com/LenThava/PaperMesh/pull/1#pullrequestreview-5614301736)
 
 ### 1.5 Overview
 
@@ -101,8 +104,10 @@ PaperMesh depends on access to JabRef's entry selection, group membership and en
 
 ### Similarity and explanations (UC2)
 
+F21 defines the calculation used by this working specification and its tests. It is not a selectable alternative or an extra feature. The final team decision on this calculation is still listed under Open questions.
+
 - /F20/ Comparison MUST use only the title and keyword terms. Missing fields contribute no terms; repeated terms count once.
-- /F21/ Proposed rule: lowercase both fields, split at characters other than letters or numbers, and remove these common English words: `a, an, and, as, at, by, for, from, in, is, it, of, on, or, the, to, with`. Compare the remaining term sets using shared terms divided by the size of their union (Jaccard similarity). If either set is empty, the score is 0. A link is drawn for a score of at least 0.25. No other link filter is proposed yet.
+- /F21/ For this draft, PaperMesh MUST lowercase both fields, split at characters other than letters or numbers, and remove these common English words: `a, an, and, as, at, by, for, from, in, is, it, of, on, or, the, to, with`. Compare the remaining term sets using shared terms divided by the size of their union (Jaccard similarity). If either set is empty, the score is 0. A link is drawn for a score of at least 0.25. No additional per-node link filter is specified in this revision.
 - /F22/ Clicking a link MUST show the two entries, their shared terms in alphabetical order and the score rounded to two decimal places in the details area. The displayed explanation MUST come from the compared metadata.
 
 ### Entry navigation (UC3)
@@ -114,43 +119,230 @@ PaperMesh depends on access to JabRef's entry selection, group membership and en
 
 - /F40/ Create group MUST request a name and create a new static group at the root of the source library, containing exactly the selected nodes' entries.
 - /F41/ The name MUST be trimmed of leading/trailing whitespace. Blank names, names already used in that library (ignoring case), a closed source library or removed selected entries MUST prevent creation and show a message. Cancel MUST create no group. There MUST be no partial group on failure.
+- /F42/ The source library and selected entries MUST be checked before opening the name dialog and again on Create. If either check fails, PaperMesh MUST show a message without creating a group.
 
 ### Safe exploration (UC1–UC5)
 
 - /F50/ Generating, exploring and navigating the graph MUST NOT change bibliographic fields such as title, keywords, author or year. Group creation may change group structure and membership only. Entries with no usable terms MUST stay visible without links.
-- /F60/ Users MUST be able to pan by dragging the background, zoom in/out by scrolling the mouse wheel up/down and use Fit view to show the whole graph. Clicking nodes and Ctrl/Cmd-clicking MUST support single and multiple selection. Open entry MUST be disabled unless exactly one node is selected; Create group MUST be disabled when none is selected. Close MUST close only PaperMesh, not JabRef.
+- /F60/ The graph window MUST provide the following exploration controls. The sub-requirements separate the individual actions:
+  - /F60.1/ Dragging empty background MUST pan the graph without changing the node selection.
+  - /F60.2/ Scrolling the mouse wheel up/down MUST zoom the graph in/out.
+  - /F60.3/ Fit view MUST place every displayed node within the graph canvas.
+  - /F60.4/ Clicking a node without a modifier MUST select only that node.
+  - /F60.5/ Ctrl-click or Cmd-click MUST toggle that node's selection while keeping the other selected nodes.
+  - /F60.6/ Clicking empty background without dragging MUST clear the node selection.
+  - /F60.7/ Open entry MUST be enabled for exactly one selected node and disabled otherwise.
+  - /F60.8/ Create group MUST be enabled for at least one selected node and disabled when none is selected. Source validity is checked under /F42/.
+  - /F60.9/ Close MUST close only PaperMesh, not JabRef.
 - /F61/ PaperMesh SHOULD provide case-insensitive substring search over title, citation key and keywords. It should highlight matches and show their count, without hiding nodes or changing the node selection. Empty search clears the highlights; no matches shows a count of 0.
 
 ## 4. Acceptance tests
 
-These tests assume the proposed interface and comparison rule above are retained. We will update the tests if the team changes either. SHOULD checks are optional, not core acceptance gates.
+These checks describe expected results for the specification above. They have not been run against an implemented add-on. The optional SHOULD check is not a core acceptance gate.
 
-### Test data
+### Test library and common starting point
 
-Create a saved test library with these entries and no other entries:
+Create a separate saved JabRef library with exactly these four sample entries:
 
 | Citation key | Title | Keywords |
 | --- | --- | --- |
 | pmA | Graph search | networks |
 | pmB | Graph search | mapping |
 | pmC | Protein folding | biology |
-| pmD | empty field | empty field |
+| pmD | leave blank | leave blank |
 
-For pmD, both fields must actually be empty, not contain the text "empty field". Set author to **Test Author** and year to **2020** for all four entries, so the preservation checks include non-empty fields. Create an existing static group **Graph papers** containing pmA and pmB. No group called **Mesh selection** should exist.
+For pmD, leave both fields empty; do not enter the words "leave blank". Set author to **Test Author** and year to **2020** for all four entries. Add a root static group **Graph papers** containing pmA and pmB. There must be no group called **Mesh selection**.
 
-Use a fresh copy of this library for each test; clear JabRef's search and select All entries in its groups sidebar unless the test says otherwise. Open PaperMesh before testing, except A10 which checks opening itself. "Generate from" means highlight the named table rows, choose Selected entries and click Generate. Temporary test libraries are separate copies, not additions to the four-entry fixture.
+For each manual test:
+1. Open a fresh copy of this test library and make it active.
+2. Clear JabRef's search and select All entries in the groups sidebar, unless the test specifies a group.
+3. Start with no table rows selected. Open Tools → PaperMesh, except in A10 which tests that action itself.
 
-- /A10/ Highlight pmA, pmC and pmD in the main table. Open Tools → PaperMesh, choose Selected entries and click Generate. Exactly those three labelled nodes appear in a separate window. The main JabRef window remains usable. Choose Close: JabRef remains open. (/F10/, /F11/, /F12/, /F60/)
-- /A11/ Select Graph papers in the groups sidebar and highlight only pmA in the visible table. Choose Selected group and Generate: exactly pmA and pmB appear. Switch to Selected entries, keep only pmA highlighted and Generate again: only pmA remains, with no selected nodes. (/F11/, /F12/)
-- /A12/ Generate all four fixture entries, then clear the table selection and Generate with Selected entries. A message appears and the same graph remains. In a temporary library, select 101 entries and Generate: it is refused without truncation. Select exactly 100 instead and Generate: exactly 100 nodes appear. (/F13/)
-- /A20/ Generate from all four test entries. There is exactly one link, pmA–pmB. Click it: details show pmA, pmB, shared terms **graph, search**, and score **0.50** (two shared terms out of four different terms). pmC and pmD have no links. (/F20/, /F21/, /F22/, /F50/)
-- /A21/ In a separate temporary library, create an entry with empty title and keywords **GRAPH; graph**, and another with empty title and keywords **graph**. Generate from both: one link appears, with the single shared term **graph** and score **1.00**. This checks keywords alone, case handling and duplicates. (/F20/, /F21/, /F22/)
-- /A22/ Test the boundary in a temporary library: entry X has empty title and keyword **graph**; entry Y has title **The graph search networks maps** and empty keywords. Their score is **0.25**, so they are linked. Add **extra** to Y's title and generate again: the score is **0.20**, and no link appears. This also checks that **the** is ignored. (/F21/)
-- /A30/ Generate from pmA and pmB, which share a title. Open entry is disabled with zero or two selected nodes. Select only pmB and click Open entry: JabRef selects pmB and its editor shows citation key pmB, not pmA. Delete pmB without regenerating and try again: a message appears and no substitute entry is opened. On a fresh copy with pmB present, generate again, close the source library and try Open entry: a message appears and no entry opens. (/F30/, /F31/, /F60/)
-- /A40/ Generate all four entries. Select pmA, then Ctrl/Cmd-click pmC. Create group → **Mesh selection** → Create: a root static group contains exactly pmA and pmC. Try an empty name, spaces only and then **mesh selection**: each shows a message and creates nothing. Enter a new name and Cancel: nothing is created. Clear node selection: Create group is disabled. On fresh copies, separately delete a selected entry or close the source library before confirmation: each shows a message with no partial group. (/F40/, /F41/, /F60/)
-- /A50/ Record all four entries' title, keywords, author and year fields. Generate the graph, inspect links, pan/zoom and open an entry. Those fields remain identical to the recorded values. Create a group: membership may change, but the recorded fields do not. pmD remains visible and unconnected. (/F50/)
-- /A60/ Generate all four nodes and select pmA. Drag empty background: node positions move on screen but pmA stays selected. Scroll up over a node: its displayed size increases; scroll down: it decreases. Fit view places all four nodes within the canvas. Click pmA, Ctrl/Cmd-click pmC, then click pmA without a modifier: the selection counts are 1, 2, 1. Clicking empty background gives 0. (/F60/)
-- /A61/ If search is implemented, generate all four entries and select pmC. Search **GRAPH**: exactly pmA and pmB are highlighted and the match count is 2; pmC stays selected and all nodes remain visible. Search **pmC** and **biology** separately: only pmC matches each. Search **zzzz**: count 0. Clear search: no search highlights remain. (/F61/, SHOULD)
+A14 is a planned automated check with its own generated records. A21 and A22 use separate temporary libraries. Changes made in one test must not carry into another.
+
+### /A10/ Open the graph window
+
+1. Highlight pmA, pmC and pmD in JabRef's main table.
+2. Choose Tools → PaperMesh.
+3. Choose Selected entries and click Generate.
+
+Expected: a separate window shows exactly those three labelled nodes, the input selector and the five buttons from 2.2. The main JabRef window remains usable. (/F10/, /F11/, /F12/)
+
+### /A11/ Use a group's full membership
+
+1. Select Graph papers in JabRef's groups sidebar.
+2. Highlight only pmA in the visible table.
+3. In PaperMesh, choose Selected group and click Generate.
+
+Expected: exactly pmA and pmB appear, not just the highlighted row. (/F11/)
+
+### /A12/ Reject empty input
+
+1. Highlight pmA, pmB, pmC and pmD; choose Selected entries and click Generate.
+2. Clear the table selection in JabRef.
+3. Keep Selected entries and click Generate again.
+
+Expected: a message explains that the input is empty. The previous four-node graph remains unchanged. (/F13/)
+
+### /A13/ Regenerate with a different input
+
+1. Highlight pmA and pmB; choose Selected entries and click Generate.
+2. Select the pmB node in the graph.
+3. In JabRef, highlight only pmC, then click Generate in PaperMesh.
+
+Expected: the old graph is replaced by exactly one node, pmC, with no nodes selected. (/F12/)
+
+### /A14/ Check the 100/101-entry boundary automatically
+
+Planned unit test for the input validator and graph model, to be implemented during development:
+1. Create 100 distinct in-memory entries with unique citation keys and generate the graph model.
+2. Assert that the model contains exactly 100 distinct nodes.
+3. Add a 101st entry and request generation again.
+
+Expected: the second request is rejected as over the limit, with no truncation and no replacement of the previous model. The test counts model nodes automatically, not circles by eye. A12 separately checks that rejected input produces a UI message and leaves the displayed graph unchanged. This is a planned test, not an existing or passing unit test. (/F12/, /F13/)
+
+### /A20/ Inspect the title-based connection
+
+1. In JabRef's main table, highlight all four sample entries: pmA, pmB, pmC and pmD.
+2. In PaperMesh, choose Selected entries and click Generate.
+3. Click the link between pmA and pmB.
+
+Expected: four nodes and exactly one link, pmA–pmB. Its details show both citation keys, the shared terms **graph, search** and score **0.50** (two shared terms out of four different terms). pmC and pmD have no links. (/F20/, /F21/, /F22/, /F50/)
+
+### /A21/ Compare keywords without titles
+
+1. In a separate temporary library, create two entries with unique citation keys and empty titles.
+2. Give the first keywords **GRAPH; graph** and the second **graph**.
+3. Highlight both rows, open PaperMesh, choose Selected entries and click Generate.
+4. Click their link.
+
+Expected: two nodes and one link, with the single shared term **graph** and score **1.00**. Case and repeated terms do not change the result. (/F20/, /F21/, /F22/)
+
+### /A22/ Check the similarity threshold
+
+1. In a temporary library, give entry X an empty title and keyword **graph**; give Y title **The graph search networks maps** and empty keywords.
+2. Highlight both rows, choose Selected entries and click Generate in PaperMesh.
+3. Click the X–Y link to inspect its details.
+
+Expected: X and Y are linked with score **0.25**; **the** is ignored.
+
+4. Add **extra** to Y's title in JabRef, keep both rows highlighted and click Generate again.
+
+Expected: no link appears, because the calculation under /F21/ now gives **0.20**, below the threshold. No score display is expected for an absent link. (/F21/)
+
+### /A30/ Open the correct entry despite duplicate titles
+
+1. Highlight pmA and pmB in JabRef; choose Selected entries and click Generate.
+2. Click only the node labelled pmB, then Open entry.
+
+Expected: the source library becomes active, pmB is selected in its table and its entry editor shows citation key pmB, not pmA. (/F30/, /F31/)
+
+### /A31/ Enable Open entry only for one node
+
+1. Generate a graph from highlighted table rows pmA and pmB, using Selected entries.
+2. Check Open entry with no nodes selected, then after clicking pmA, then after Ctrl/Cmd-clicking pmB.
+
+Expected, in that order: disabled, enabled, disabled. (/F60.7/)
+
+### /A32/ Handle a deleted entry
+
+1. Generate a graph from highlighted rows pmA and pmB, using Selected entries, and select the pmB node.
+2. Delete pmB in JabRef without regenerating the graph.
+3. Click Open entry in PaperMesh.
+
+Expected: a message explains that the entry is unavailable; no substitute entry or editor is opened. (/F31/)
+
+### /A33/ Handle a closed source library
+
+1. Generate a graph from highlighted rows pmA and pmB, using Selected entries, and select the pmB node.
+2. Close that library in JabRef without closing PaperMesh.
+3. Click Open entry.
+
+Expected: a message explains that the source library is unavailable; no entry is opened. (/F31/)
+
+### /A40/ Create a group successfully
+
+1. Highlight all four sample entries; choose Selected entries and click Generate.
+2. Click pmA, then Ctrl/Cmd-click pmC.
+3. Click Create group, enter **Mesh selection** and confirm with Create.
+
+Expected: a new root static group in the source library contains exactly pmA and pmC. (/F40/)
+
+### /A41/ Reject invalid group names
+
+Run each row below independently with a fresh copy of the test library. First carry out its Additional setup in JabRef, then select All entries and clear search again. Highlight pmA, pmB, pmC and pmD in the table, choose Selected entries and click Generate. Select pmA and pmC in the graph.
+
+| Name to enter | Additional setup | Expected result after Create |
+| --- | --- | --- |
+| Leave the name field empty | None | Message; no group created |
+| Type exactly three space characters | None | Message; no group created |
+| mesh selection | First create an existing group named Mesh selection | Message; no additional group or membership change |
+
+Click Create group, enter the row's name and confirm with Create. (/F41/)
+
+### /A42/ Cancel group creation
+
+1. Generate from all four explicitly highlighted table rows, using Selected entries; select pmA and pmC in the graph.
+2. Click Create group and enter **Mesh selection**.
+3. Click Cancel.
+
+Expected: no new group and no changed memberships. (/F41/)
+
+### /A43/ Do not create a group with a removed entry
+
+1. Generate from all four explicitly highlighted table rows, using Selected entries; select pmA and pmC in the graph.
+2. Delete pmC in JabRef without regenerating.
+3. Click Create group.
+
+Expected: a message appears before the name dialog; no group is created, including no partial group containing only pmA. (/F41/, /F42/)
+
+### /A44/ Do not create a group in a closed library
+
+1. Generate from all four explicitly highlighted table rows, using Selected entries; select pmA and pmC in the graph.
+2. Close the source library in JabRef.
+3. Click Create group.
+
+Expected: a message appears before the name dialog; no group is created in another library. (/F41/, /F42/)
+
+### /A45/ Enable Create group only with a selection
+
+1. Generate from highlighted table rows pmA and pmB, using Selected entries.
+2. Check Create group with no nodes selected, after clicking pmA, and after clicking empty background.
+
+Expected, in that order: disabled, enabled, disabled. (/F60.6/, /F60.8/)
+
+### /A50/ Preserve bibliographic fields
+
+1. Record the four sample entries' title, keywords, author and year values.
+2. Highlight all four rows, choose Selected entries and click Generate.
+3. Inspect the pmA–pmB link and pan/zoom. Click the pmA node, then Open entry.
+4. Return to PaperMesh, click pmA and Ctrl/Cmd-click pmC. Click Create group, enter **Mesh selection** and confirm with Create.
+
+Expected: the recorded fields remain identical after these actions. Only group structure/membership changes; pmD remains visible and unconnected. (/F50/)
+
+### /A60/ Explore and close the graph
+
+Generate from all four explicitly highlighted table rows using Selected entries. Perform these checks in order:
+
+| Step | Action | Expected result | Requirement |
+| --- | --- | --- | --- |
+| 1 | Click pmA, then drag empty background | Nodes move on screen; pmA stays selected | /F60.1/ |
+| 2 | Scroll up over a node, then down | Its displayed size increases, then decreases | /F60.2/ |
+| 3 | Click Fit view | All four nodes fit within the canvas | /F60.3/ |
+| 4 | Click pmA, Ctrl/Cmd-click pmC, then click pmA without a modifier | Selection counts are 1, 2, 1 | /F60.4/, /F60.5/ |
+| 5 | Click empty background without dragging | Selection count is 0 | /F60.6/ |
+| 6 | Click Close | PaperMesh closes; JabRef and the library stay open | /F60.9/ |
+
+### /A61/ Search the graph (SHOULD)
+
+If search is implemented:
+1. Highlight all four sample entries; choose Selected entries and click Generate, then select pmC in the graph.
+2. Search **GRAPH**: pmA and pmB are highlighted, count 2; pmC stays selected and all nodes remain visible.
+3. Search **pmC**, then **biology**: only pmC matches each, count 1.
+4. Search **zzzz**: count 0.
+5. Clear search: no search highlights remain.
+
+These steps must not change the node selection or hide nodes. (/F61/, SHOULD)
 
 ## Appendix A. Use cases
 

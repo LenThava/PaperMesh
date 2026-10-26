@@ -1,6 +1,6 @@
 # PaperMesh project documentation
 
-Status: the first Pflichtenheft and plan were submitted in [PR #1](https://github.com/LenThava/PaperMesh/pull/1) on 9 October. The working revision responds to Giovanni's feedback; its UI, similarity rule and limits are still tentative. The shared JabRef codebase has not been selected or added yet.
+Status: the first Pflichtenheft and plan were submitted in [PR #1](https://github.com/LenThava/PaperMesh/pull/1) on 9 October. The 26 October revision addresses Giovanni's 22 October feedback with clearer definitions, smaller interaction requirements and separate acceptance tests. Final team agreement on the interface, calculation and limits is still open. The shared JabRef codebase has not been selected or added yet.
 
 ## Workflow
 
