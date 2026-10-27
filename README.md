@@ -6,22 +6,22 @@ Software Engineering HS 2026 project proposal.
 
 ## Repository status
 
-This repository currently contains PaperMesh project documentation. The team has not yet selected or added the JabRef source code.
+This public repository contains PaperMesh project documentation. Development will use the private course fork [LenThava/jabref_hs26](https://github.com/LenThava/jabref_hs26). Its initial revision is recorded in the [Pflichtenheft](https://github.com/LenThava/PaperMesh/blob/requirements/docs/sweng/pflichtenheft.md).
 
-- [`project`](https://github.com/LenThava/PaperMesh/tree/project): shared project branch and documentation index.
+- [`project`](https://github.com/LenThava/PaperMesh/tree/project): documentation review branch and index.
 - [`requirements`](https://github.com/LenThava/PaperMesh/tree/requirements/docs/sweng): working branch for the Pflichtenheft and project plan.
 - Project documentation is kept in `docs/sweng`.
-
-The documentation structure is prepared. The complete development setup still requires a shared JabRef codebase and access for every team member.
 
 ## Group members
 
 - Cian Boeniger
-- Len Thava
-- Gian Ledergerber
+- Dehlen Thavarajah
+- Gian Ledergeber
 - Hrishi Budema
 
 ## Project description
+
+The description below is the earlier proposal. The smaller current scope and tentative interface are described in the [working Pflichtenheft](https://github.com/LenThava/PaperMesh/blob/requirements/docs/sweng/pflichtenheft.md).
 
 PaperMesh extends JabRef with an interactive, Obsidian-inspired graph view of the managed bibliography. Its goal is to help researchers discover relationships, topic clusters, and potentially overlooked papers within an existing JabRef library.
 
@@ -44,8 +44,8 @@ The main difficulty will be calculating useful similarity scores from incomplete
 This is a tentative division of the work and may change during the project:
 
 - **Cian Boeniger:** metadata processing and similarity calculation.
-- **Len Thava:** the graph interface.
-- **Gian Ledergerber:** integration with JabRef.
+- **Dehlen Thavarajah:** the graph interface.
+- **Gian Ledergeber:** integration with JabRef.
 - **Hrishi Budema:** testing and documentation.
 
 We will help each other where needed.
