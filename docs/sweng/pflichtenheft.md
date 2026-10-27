@@ -2,7 +2,7 @@
 
 PaperMesh - Literature Similarity Map for JabRef
 
-Working draft, revised 26 October 2026 after Giovanni's feedback of 22 October. This document specifies the currently planned behaviour, not implemented or approved features. The codebase has been selected; the interface, similarity calculation and limits still need team confirmation before the final version on 27 October.
+Revision for the 27 October 2026 milestone, updated after Giovanni's feedback. This document describes the planned behaviour and acceptance criteria for PaperMesh.
 
 Team: Cian Boeniger, Dehlen Thavarajah, Gian Ledergeber and Hrishi Budema.
 
@@ -93,7 +93,7 @@ The aim is to run on a computer that already runs the course JabRef version, wit
 
 ### 2.5 Assumptions and dependencies
 
-PaperMesh depends on access to JabRef's entry selection, group membership and entry editor. The codebase is selected, but team access and a reproducible build of the shared baseline still need checking before integration. There is no dependency on an external API.
+PaperMesh will use JabRef's entry selection, group membership and entry editor. There is no dependency on an external API.
 
 ## 3. Requirements
 
@@ -392,5 +392,4 @@ These steps must not change the node selection or hide nodes. (/F61/, SHOULD)
 
 - OPEN QUESTION: Does the team agree with the separate window, Tools entry point and proposed controls? We will check the existing JabRef action/dialog pattern in a prototype.
 - OPEN QUESTION: Is the proposed term rule, 0.25 threshold and 100-entry limit useful on a small real library? Dense graphs may need a further link limit; we have not committed to one yet.
-- OPEN QUESTION: Can every group member access and build the selected private fork at the recorded baseline? Repository selection does not yet establish team access or a verified integration setup.
 - OPEN QUESTION: Does the bounded graph stay usable on the team's existing computers? We will measure this after the prototype, rather than invent a hardware or timing guarantee.
