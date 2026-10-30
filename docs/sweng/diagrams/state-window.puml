@@ -1,0 +1,65 @@
+@startuml papermesh-state-window
+skinparam shadowing false
+skinparam state {
+  BackgroundColor #D5F5D5
+  BorderColor #2E7D32
+  BackgroundColor<<planned>> #F4FBF4
+  BorderColor<<planned>> #9E9E9E
+}
+
+legend top left
+  |= Marking |= Meaning |
+  | green state | exists in the prototype |
+  | pale state, "(planned)" | target design, not yet in the prototype |
+  | text inside a state | internal transition (the state is not left) |
+endlegend
+
+[*] --> NoGraph : Tools → PaperMesh
+
+state "No graph" as NoGraph
+NoGraph : Open entry: disabled
+NoGraph : Create group: disabled
+NoGraph : Generate [no library, empty or > 100] / message
+
+state "Graph shown" as GraphShown {
+  GraphShown : Generate [no library, empty or > 100] / message, graph kept
+  GraphShown : Pan, Zoom, Fit view, click link / show details (planned)
+  GraphShown : Create group [library closed or entry removed] / message (planned)
+  state "Nothing selected (planned)" as None <<planned>>
+  None : Open entry: disabled
+  None : Create group: disabled
+  state "One node selected (planned)" as One <<planned>>
+  One : Open entry: enabled
+  One : Create group: enabled
+  One : Open entry / show entry in JabRef or message
+  state "Several nodes selected (planned)" as Several <<planned>>
+  Several : Open entry: disabled
+  Several : Create group: enabled
+
+  [*] --> None
+  None --> One : click node
+  One --> Several : Ctrl/Cmd-click\nanother node
+  Several --> One : Ctrl/Cmd-click a selected node\n[exactly one remains selected]
+  Several --> Several : Ctrl/Cmd-click a selected node\n[several remain selected]
+  One --> None : Ctrl/Cmd-click\nthe same node
+  One --> One : click another node\nwithout modifier
+  Several --> One : click a node\nwithout modifier
+  One --> None : click background
+  Several --> None : click background
+}
+
+state "Name dialog open (planned)" as Dialog <<planned>>
+Dialog : modal, the window waits
+
+NoGraph --> GraphShown : Generate [valid input]\n/ draw new graph
+GraphShown --> GraphShown : Generate [valid input]\n/ replace graph, clear selection
+
+One --> Dialog : Create group [library open\nand entries present]
+Several --> Dialog : Create group [library open\nand entries present]
+Dialog --> GraphShown[H] : Create [valid name]\n/ create group
+Dialog --> GraphShown[H] : Create [blank or existing\nname] / message
+Dialog --> GraphShown[H] : Cancel
+
+NoGraph --> [*] : close window
+GraphShown --> [*] : close window
+@enduml

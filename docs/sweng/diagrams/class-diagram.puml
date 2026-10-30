@@ -1,0 +1,171 @@
+@startuml papermesh-class-diagram
+set separator none
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam nodesep 30
+skinparam ranksep 50
+skinparam class {
+  BackgroundColor<<new>> #D5F5D5
+  BorderColor<<new>> #2E7D32
+  BackgroundColor<<planned>> #F4FBF4
+  BorderColor<<planned>> #2E7D32
+  BackgroundColor<<modified>> #FFE0B2
+  BorderColor<<modified>> #E65100
+  BackgroundColor<<JabRef>> #E8E8E8
+  BorderColor<<JabRef>> #777777
+  BackgroundColor<<JavaFX>> #FFFFFF
+  BorderColor<<JavaFX>> #777777
+}
+
+legend bottom right
+  |= Marking |= Meaning |
+  | <back:#D5F5D5> «new» </back> | new PaperMesh class, exists in the prototype |
+  | <back:#F4FBF4> «planned» </back> | new PaperMesh class, not yet in the prototype |
+  | <back:#FFE0B2> «modified» </back> | existing JabRef class, changed by us |
+  | <back:#E8E8E8> «JabRef» </back> | existing JabRef class, used unchanged |
+  | (planned) | member or relation not yet in the prototype |
+endlegend
+
+package "JabRef: menu and actions" {
+  class MainMenu <<modified>>
+  class StandardActions <<modified>> {
+    + PAPERMESH
+  }
+  class SimpleCommand <<JabRef>>
+  class ActionHelper <<JabRef>> {
+    + needsDatabase(StateManager)
+  }
+}
+
+package "JavaFX" {
+  class Stage <<JavaFX>>
+  class Pane <<JavaFX>>
+}
+
+package "org.jabref.gui.papermesh (new)" {
+  class PaperMeshAction <<new>> {
+    + execute()
+  }
+  class PaperMeshWindow <<new>> {
+    - stateManager : StateManager
+    - graphView : PaperMeshGraphView
+    - status : Label
+    - library : BibDatabaseContext (planned)
+    - generate()
+    + openEntry() (planned)
+    + createGroup() (planned)
+    + showLink(Link) (planned)
+  }
+  class PaperMeshGraphView <<new>> {
+    + setGraph(PaperMeshGraph)
+    + fitView() (planned)
+    + getSelectedEntries() (planned)
+    + selectedCountProperty() (planned)
+    + setOnLinkClicked(Consumer<Link>) (planned)
+  }
+  class "PaperMeshGraphView.Node" as Node <<planned>> {
+    - entry : BibEntry
+    - selected : boolean
+  }
+}
+
+package "org.jabref.logic.papermesh (new)" {
+  class PaperMeshGraph <<new>> {
+    + THRESHOLD = 0.25
+    - nodes : List<BibEntry>
+    - links : List<Link>
+    + PaperMeshGraph(List<BibEntry>)
+    + getNodes() : List<BibEntry>
+    + getLinks() : List<Link>
+    + {static} getTerms(BibEntry) : Set<String>
+  }
+  class "PaperMeshGraph.Link" as Link <<new>> {
+    first : BibEntry
+    second : BibEntry
+    sharedTerms : List<String>
+    score : double
+  }
+  class PaperMeshGroups <<planned>> {
+    + {static} createGroup(BibDatabaseContext,
+      List<BibEntry>, String, Character) : String
+  }
+}
+
+package "JabRef: state and model" {
+  class StateManager <<JabRef>> {
+    + getActiveDatabase()
+    + getSelectedEntries()
+    + getSelectedGroups(BibDatabaseContext) (planned)
+  }
+  class BibDatabaseContext <<JabRef>>
+  class BibEntry <<JabRef>>
+  class StandardField <<JabRef>> {
+    TITLE
+    KEYWORDS
+  }
+}
+
+package "JabRef: used by planned features" {
+  class JabRefFrame <<JabRef>> {
+    + getLibraryTabs()
+    + showLibraryTab(LibraryTab)
+    + getMainStage()
+  }
+  class LibraryTab <<JabRef>> {
+    + getBibDatabaseContext()
+    + clearAndSelect(BibEntry)
+    + showAndEdit(BibEntry)
+  }
+  class DialogService <<JabRef>> {
+    + showInputDialogAndWait(...)
+  }
+  class PreferencesService <<JabRef>>
+  class MetaData <<JabRef>> {
+    + getGroups()
+    + setGroups(GroupTreeNode)
+  }
+  class GroupTreeNode <<JabRef>> {
+    + findMatches(BibDatabase)
+  }
+  class ExplicitGroup <<JabRef>>
+  class DefaultGroupsFactory <<JabRef>>
+}
+
+' ---------- menu and action (prototype) ----------
+MainMenu ..> StandardActions : uses PAPERMESH
+MainMenu ..> PaperMeshAction : creates
+SimpleCommand <|-- PaperMeshAction
+ActionHelper <.. PaperMeshAction : enabled only\nwith a library
+PaperMeshAction ..> PaperMeshWindow : opens a new\nwindow per click
+
+' ---------- window and view (prototype) ----------
+Stage <|-- PaperMeshWindow
+Pane <|-- PaperMeshGraphView
+PaperMeshWindow *-- "1" PaperMeshGraphView
+PaperMeshWindow --> "1" StateManager
+PaperMeshWindow ..> PaperMeshGraph : creates
+PaperMeshGraphView ..> PaperMeshGraph : draws
+
+' ---------- logic and model (prototype) ----------
+PaperMeshGraph "1" *-- "0..*" Link
+PaperMeshGraph o-- "1..100" BibEntry : nodes\n(no copies)
+Link --> "2" BibEntry
+PaperMeshGraph ..> StandardField
+StateManager ..> BibDatabaseContext
+BibDatabaseContext -[hidden]- JabRefFrame
+
+' ---------- planned ----------
+PaperMeshGraphView +-- Node
+Node --> "1" BibEntry
+PaperMeshWindow --> "0..1" BibDatabaseContext : source library\n(planned)
+PaperMeshWindow ..> PaperMeshGroups : (planned)
+PaperMeshWindow ..> JabRefFrame : (planned)
+PaperMeshWindow ..> LibraryTab : (planned)
+PaperMeshWindow ..> DialogService : (planned)
+PaperMeshWindow ..> PreferencesService : (planned)
+PaperMeshGroups ..> MetaData
+PaperMeshGroups ..> GroupTreeNode
+PaperMeshGroups ..> ExplicitGroup
+PaperMeshGroups ..> DefaultGroupsFactory
+@enduml
