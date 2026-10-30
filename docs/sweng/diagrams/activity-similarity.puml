@@ -1,0 +1,40 @@
+@startuml papermesh-activity-similarity
+skinparam shadowing false
+title Link calculation in PaperMeshGraph (constructor)
+
+start
+:receive the input entries (1 to 100);
+partition "Build the terms of each entry (getTerms)" {
+  repeat :take the next entry;
+    :read title and keywords
+    (a missing field gives no terms);
+    :convert to lower case;
+    :split at every character that is
+    not a letter or a digit;
+    :remove the 17 stop words
+    (a, an, and, as, at, by, for, from, in,
+    is, it, of, on, or, the, to, with);
+    :store the remaining terms as a set
+    (each term counts once);
+  repeat while (more entries?) is (yes)
+  -> no;
+}
+partition "Compare every pair once" {
+  while (another pair (a, b) with a before b?) is (yes)
+    if (term set of a or b is empty?) then (yes)
+      :score = 0;
+    else (no)
+      :shared = terms(a) ∩ terms(b)
+      union = terms(a) ∪ terms(b);
+      :score = |shared| / |union|;
+    endif
+    if (score >= 0.25?) then (yes)
+      :create Link(a, b, shared terms
+      in alphabetical order, score);
+    else (no)
+    endif
+  endwhile (no)
+}
+:nodes = input entries, links = created links;
+stop
+@enduml

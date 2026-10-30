@@ -1,0 +1,62 @@
+@startuml papermesh-sequence-generate
+skinparam shadowing false
+skinparam sequenceMessageAlign left
+skinparam participant {
+  BackgroundColor<<new>> #D5F5D5
+  BorderColor<<new>> #2E7D32
+  BackgroundColor<<JabRef>> #E8E8E8
+  BorderColor<<JabRef>> #777777
+}
+
+actor User
+participant "PaperMeshWindow" as W <<new>>
+participant "StateManager" as S <<JabRef>>
+participant "PaperMeshGraph" as G <<new>>
+participant "PaperMeshGraphView" as V <<new>>
+
+User -> W : click Generate
+activate W
+W -> W : generate()
+W -> S : getActiveDatabase()
+S --> W : Optional<BibDatabaseContext>
+
+alt no library active
+  W -> W : status: "Open a library to\ngenerate the graph."
+else library active
+  W -> S : getSelectedEntries()
+  S --> W : entries
+
+  alt entries is empty
+    W -> W : status: "The input is empty.\nHighlight entries in the main table."
+    note right of W : previous graph stays unchanged
+  else more than 100 entries
+    W -> W : status: "<n> entries selected. PaperMesh\nsupports at most 100 entries."
+    note right of W : previous graph stays unchanged
+  else 1 to 100 entries
+    create G
+    W -> G : new PaperMeshGraph(entries)
+    activate G
+    loop for each entry
+      G -> G : getTerms(entry)
+    end
+    loop for each pair of entries
+      G -> G : score = |shared| / |union|
+      opt score >= 0.25
+        G -> G : add Link(first, second,\nsharedTerms, score)
+      end
+    end
+    G --> W : graph
+    deactivate G
+
+    W -> V : setGraph(graph)
+    activate V
+    V -> G : getNodes()
+    V -> G : getLinks()
+    V -> V : clear old content
+    V -> V : draw links (Line),\nthen nodes on a circle (Circle, Text)
+    deactivate V
+    W -> W : status: "<n> entries, <m> links"
+  end
+end
+deactivate W
+@enduml
